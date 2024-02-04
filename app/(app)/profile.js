@@ -1,14 +1,22 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function profile() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
+  console.log(user.profilePicture);
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>profile</Text>
+      <Image
+        style={styles.profilePicture}
+        resizeMode="contain"
+        source={{
+          uri: `${user?.profilePicture}`,
+        }}
+      />
+      <Text>{user?.displayName}</Text>
       <TouchableOpacity
         style={styles.button}
         // disabled={!loginRequest}
@@ -24,6 +32,11 @@ export default function profile() {
 }
 
 const styles = StyleSheet.create({
+  profilePicture: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
   button: {
     width: "50%",
     backgroundColor: "#FB2233",

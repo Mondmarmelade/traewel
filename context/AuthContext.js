@@ -4,6 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as SecureStore from "expo-secure-store";
 import Scopes from "../constants/Scopes";
 import Discovery from "../constants/Discovery";
+import axios from "axios";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -11,6 +12,7 @@ export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [authData, setAuthData] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
 
   useEffect(() => {
@@ -18,12 +20,28 @@ export const AuthContextProvider = ({ children }) => {
 
     SecureStore.getItemAsync("AUTH_STATE_KEY").then((storeData) => {
       if (storeData != null) {
-        setIsAuthenticated(true);
+        setAuthData(JSON.parse(storeData));
       } else {
         setIsAuthenticated(false);
       }
     });
   }, []);
+
+  useEffect(() => {
+    // console.log("accessToken", authData?.accessToken);
+
+    if (authData != null) {
+      axios
+        .get("https://traewelling.de/api/v1/auth/user", {
+          headers: { Authorization: `Bearer ${authData?.accessToken}` },
+        })
+        .then((res) => {
+          setUser(res.data.data);
+          console.log("USER SET!");
+          setIsAuthenticated(true);
+        });
+    }
+  }, [authData]);
 
   // Login
   const [loginRequest, loginResponse, promptLoginAsync] =
@@ -81,10 +99,11 @@ export const AuthContextProvider = ({ children }) => {
     try {
       setIsAuthenticated(false);
       await SecureStore.deleteItemAsync("AUTH_STATE_KEY").then(() => {
+        setAuthData(null);
         setUser(null);
       });
-    } catch (e) {
-      alert("Fehler beim Abmelden!");
+    } catch (error) {
+      alert("Fehler beim Abmelden!", error);
     }
   };
 
