@@ -30,7 +30,7 @@ export const AuthContextProvider = ({ children }) => {
     AuthSession.useAuthRequest(
       {
         clientId: "110",
-        clientSecret: "nqySc7UT8kacD9PPVQGDBGh46bxj1COLkus3xUyy",
+        clientSecret: process.env.EXPO_PUBLIC_TRAEWELLING_CLIENT_SECRET,
         scopes: Scopes,
         redirectUri: AuthSession.makeRedirectUri({
           scheme: "myapp", //needs to be changed in production
@@ -44,7 +44,7 @@ export const AuthContextProvider = ({ children }) => {
       const tokenResult = await AuthSession.exchangeCodeAsync(
         {
           clientId: "110",
-          clientSecret: "nqySc7UT8kacD9PPVQGDBGh46bxj1COLkus3xUyy",
+          clientSecret: process.env.EXPO_PUBLIC_TRAEWELLING_CLIENT_SECRET,
           code: loginResponse.params.code,
           redirectUri: AuthSession.makeRedirectUri({
             scheme: "myapp", //needs to be changed in production
