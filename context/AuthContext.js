@@ -39,6 +39,12 @@ export const AuthContextProvider = ({ children }) => {
           setUser(res.data.data);
           console.log("USER SET!");
           setIsAuthenticated(true);
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            // When App is opened but API-Token is deleted in traewelling.de settings
+            deleteUserDatalLocally();
+          }
         });
     }
   }, [authData]);
@@ -97,14 +103,36 @@ export const AuthContextProvider = ({ children }) => {
   // Logout
   const logout = async () => {
     try {
-      setIsAuthenticated(false);
-      await SecureStore.deleteItemAsync("AUTH_STATE_KEY").then(() => {
-        setAuthData(null);
-        setUser(null);
-      });
+      console.log("LOGOUT fired!");
+      console.log(authData?.accessToken);
+      axios
+        .post(
+          "https://traewelling.de/api/v1/auth/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${authData.accessToken}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log("LOGOUT API RESONSE", response);
+          deleteUserDatalLocally();
+        })
+        .catch((err) => {
+          console.log("ERROR LOGOUT", err);
+        });
     } catch (error) {
       alert("Fehler beim Abmelden!", error);
     }
+  };
+
+  const deleteUserDatalLocally = async () => {
+    setIsAuthenticated(false);
+    await SecureStore.deleteItemAsync("AUTH_STATE_KEY").then(() => {
+      setAuthData(null);
+      setUser(null);
+    });
   };
 
   return (
